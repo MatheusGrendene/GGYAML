@@ -1,0 +1,1 @@
+export { generateYAML } from '@ggyaml/yaml-generator'
