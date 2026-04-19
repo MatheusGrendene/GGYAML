@@ -1,121 +1,85 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { defaultWizardData } from './types/wizard'
+import type { WizardData } from './types/wizard'
+import { generateYAML } from './generator/generateYAML'
+import StepPlatform from './steps/StepPlatform'
+import StepProjectInfo from './steps/StepProjectInfo'
+import StepPipeline from './steps/StepPipeline'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const TOTAL_STEPS = 3
 
+export default function App() {
+  const [step, setStep] = useState(1)
+  const [data, setData] = useState<WizardData>(defaultWizardData)
+
+  const update = (newData: Partial<WizardData>) =>
+    setData(prev => ({ ...prev, ...newData }))
+
+  const next = () => setStep(s => Math.min(s + 1, TOTAL_STEPS))
+  const back = () => setStep(s => Math.max(s - 1, 1))
+
+  const yaml = generateYAML(data)
+  const handleDownload = async () => {
+    const res = await fetch('http://localhost:3001/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${data.projectName || 'pipeline'}.yml`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app">
+      {/* Left: Wizard */}
+      <div className="wizard-panel">
+        <div className="wizard-header">
+          <h1>GGYAML</h1>
+          <p>Generate CI/CD pipeline configurations</p>
+          <div className="step-progress">
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+              <div key={i} className={`step-dot ${i < step ? 'active' : ''}`} />
+            ))}
+          </div>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="wizard-content">
+          {step === 1 && <StepPlatform data={data} onChange={update} />}
+          {step === 2 && <StepProjectInfo data={data} onChange={update} />}
+          {step === 3 && <StepPipeline data={data} onChange={update} />}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <div className="wizard-footer">
+          {step > 1 && (
+            <button className="btn btn-ghost" onClick={back}>Back</button>
+          )}
+          {step < TOTAL_STEPS && (
+            <button className="btn btn-primary" onClick={next}>Continue</button>
+          )}
+          {step === TOTAL_STEPS && (
+            <button className="btn btn-primary" onClick={handleDownload}>
+              Download YAML
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Right: Preview */}
+      <div className="preview-panel">
+        <div className="preview-header">
+          <div className="preview-dot" />
+          <span>pipeline.yml — live preview</span>
+        </div>
+        <div className="preview-body">
+          <pre>{yaml}</pre>
+        </div>
+      </div>
+    </div>
   )
 }
-
-export default App
