@@ -23,3 +23,17 @@ export const defaultWizardData: WizardData = {
     deploy: false,
   }
 }
+
+export type CIVariable = {
+  key: string
+  value: string
+  masked: boolean
+  protected: boolean
+  environment_scope: string
+}
+
+export type GitLabConfig = {
+  projectId: string
+  token: string
+  variables: CIVariable[]
+}
