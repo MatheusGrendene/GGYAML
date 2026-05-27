@@ -10,6 +10,7 @@ import StepGitHubConnect from './steps/StepGitHubConnect'
 import StepGitHubSecrets from './steps/StepGitHubSecrets'
 import PushResult from './components/PushResult'
 import './App.css'
+import { encryptSecret } from './utils/encrypt'
 
 type PushResult = {
   success: boolean
