@@ -5,8 +5,10 @@ type Props = {
   projectId: string
   token: string
   projectPath?: string
+  hasAuth: boolean
   onSubmit: (variables: CIVariable[]) => void
   onBack: () => void
+  onSkip: () => void
   isLoading: boolean
 }
 
@@ -20,8 +22,10 @@ const emptyVariable = (): CIVariable => ({
 
 export default function StepGitLabVariables({
   projectPath,
+  hasAuth,
   onSubmit,
   onBack,
+  onSkip,
   isLoading
 }: Props) {
   const [variables, setVariables] = useState<CIVariable[]>([emptyVariable()])
@@ -45,6 +49,33 @@ export default function StepGitLabVariables({
     onSubmit(variables)
   }
 
+  // User skipped the connect step — no token available
+  if (!hasAuth) {
+    return (
+      <div>
+        <h2 className="step-title">GitLab CI/CD Variables</h2>
+        <p className="step-subtitle">
+          You skipped the GitLab connect step, so variables cannot be pushed automatically.
+          Your YAML file is ready to download.
+        </p>
+        <div className="stage-item" style={{ marginBottom: '20px', borderColor: 'var(--accent-border)' }}>
+          <div className="stage-item-left">
+            <strong>Just need the YAML?</strong>
+            <span>
+              Download your pipeline file and set up variables manually in your
+              GitLab project under Settings → CI/CD → Variables.
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button className="btn btn-ghost" onClick={onBack}>Back</button>
+          <button className="btn btn-primary" onClick={onSkip}>Download YAML</button>
+        </div>
+      </div>
+    )
+  }
+
+  // User connected — show the full variables form
   return (
     <div>
       <h2 className="step-title">GitLab CI/CD Variables</h2>
@@ -158,6 +189,9 @@ export default function StepGitLabVariables({
 
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
         <button className="btn btn-ghost" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onSkip}>
+          Skip, just download
+        </button>
         <button
           className="btn btn-primary"
           onClick={handleSubmit}

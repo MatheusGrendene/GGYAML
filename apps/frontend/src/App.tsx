@@ -16,7 +16,6 @@ type PushResultType = {
   success: boolean
   created: string[]
   updated: string[]
-  pushed?: string[]
   failed: { key: string; reason: string }[]
 }
 
@@ -34,7 +33,6 @@ export default function App() {
   const update = (newData: Partial<WizardData>) =>
     setData(prev => ({ ...prev, ...newData }))
 
-  // Both platforms now have 5 steps
   const totalSteps = data.platform ? 5 : 3
   const next = () => setStep(s => Math.min(s + 1, totalSteps))
   const back = () => setStep(s => Math.max(s - 1, 1))
@@ -42,12 +40,10 @@ export default function App() {
   const isGitHub = data.platform === 'github-actions'
   const isGitLab = data.platform === 'gitlab-ci'
 
-  // Step layout is now symmetrical:
-  // 1=Platform, 2=Connect, 3=ProjectInfo, 4=Pipeline, 5=Action (secrets/variables)
-  const isConnectStep   = step === 2
-  const isProjectStep   = step === 3
-  const isPipelineStep  = step === 4
-  const isActionStep    = step === 5
+  const isConnectStep  = step === 2
+  const isProjectStep  = step === 3
+  const isPipelineStep = step === 4
+  const isActionStep   = step === 5
 
   const yaml = generateYAML(data)
 
@@ -64,6 +60,12 @@ export default function App() {
     a.download = `${data.projectName || 'pipeline'}.yml`
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  // Downloads the YAML and resets the wizard back to step 1
+  const handleSkip = async () => {
+    await handleDownload()
+    handleReset()
   }
 
   const handlePushGitLabVariables = async (variables: CIVariable[]) => {
@@ -117,9 +119,6 @@ export default function App() {
     setPushResult(null)
   }
 
-  const continueDisabled =
-    isConnectStep && ((isGitHub && !githubAuth) || (isGitLab && !gitlabAuth))
-
   const showFooter = !pushResult && !isActionStep
 
   return (
@@ -160,30 +159,31 @@ export default function App() {
                 />
               )}
 
-              {isProjectStep && <StepProjectInfo data={data} onChange={update} />}
+              {isProjectStep  && <StepProjectInfo data={data} onChange={update} />}
+              {isPipelineStep && <StepPipeline data={data} onChange={update} onBack={back} />}
 
-              {isPipelineStep && <StepPipeline data={data} onChange={update} onBack={function (): void {
-                  throw new Error('Function not implemented.')
-                } } />}
-
-              {isActionStep && isGitLab && gitlabAuth && (
+              {isActionStep && isGitLab && (
                 <StepGitLabVariables
-                  projectId={gitlabAuth.projectId}
-                  token={gitlabAuth.token}
-                  projectPath={gitlabAuth.projectPath}
+                  projectId={gitlabAuth?.projectId ?? ''}
+                  token={gitlabAuth?.token ?? ''}
+                  projectPath={gitlabAuth?.projectPath}
+                  hasAuth={!!gitlabAuth}
                   onSubmit={handlePushGitLabVariables}
                   onBack={back}
+                  onSkip={handleSkip}
                   isLoading={isLoading}
                 />
               )}
 
-              {isActionStep && isGitHub && githubAuth && (
+              {isActionStep && isGitHub && (
                 <StepGitHubSecrets
-                  token={githubAuth.token}
-                  owner={githubAuth.owner}
-                  repo={githubAuth.repo}
+                  token={githubAuth?.token ?? ''}
+                  owner={githubAuth?.owner ?? ''}
+                  repo={githubAuth?.repo ?? ''}
+                  hasAuth={!!githubAuth}
                   onSubmit={handlePushGitHubSecrets}
                   onBack={back}
+                  onSkip={handleSkip}
                   isLoading={isLoading}
                 />
               )}
@@ -197,11 +197,7 @@ export default function App() {
               <button className="btn btn-ghost" onClick={back}>Back</button>
             )}
             {step < totalSteps && (
-              <button
-                className="btn btn-primary"
-                onClick={next}
-                disabled={continueDisabled}
-              >
+              <button className="btn btn-primary" onClick={next}>
                 Continue
               </button>
             )}

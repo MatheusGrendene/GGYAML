@@ -6,23 +6,27 @@ type Props = {
   token: string
   owner: string
   repo: string
+  hasAuth: boolean
   onSubmit: (secrets: Secret[]) => void
   onBack: () => void
+  onSkip: () => void
   isLoading: boolean
 }
 
 const emptySecret = (): Secret => ({ key: '', value: '' })
 
-export default function StepGitHubSecrets({ owner, repo, onSubmit, onBack, isLoading }: Props) {
+export default function StepGitHubSecrets({
+  owner, repo, hasAuth, onSubmit, onBack, onSkip, isLoading
+}: Props) {
   const [secrets, setSecrets] = useState<Secret[]>([emptySecret()])
 
-  const update = (index: number, field: keyof Secret, value: string) => {
+  const update = (index: number, field: keyof Secret, value: string) =>
     setSecrets(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s))
-  }
 
   const add = () => setSecrets(prev => [...prev, emptySecret()])
 
-  const remove = (index: number) => setSecrets(prev => prev.filter((_, i) => i !== index))
+  const remove = (index: number) =>
+    setSecrets(prev => prev.filter((_, i) => i !== index))
 
   const handleSubmit = () => {
     const valid = secrets.every(s => s.key.trim() !== '' && s.value.trim() !== '')
@@ -33,11 +37,39 @@ export default function StepGitHubSecrets({ owner, repo, onSubmit, onBack, isLoa
     onSubmit(secrets)
   }
 
+  // User skipped the connect step — no token available
+  if (!hasAuth) {
+    return (
+      <div>
+        <h2 className="step-title">GitHub Actions Secrets</h2>
+        <p className="step-subtitle">
+          You skipped the GitHub connect step, so secrets cannot be pushed automatically.
+          Your YAML file is ready to download.
+        </p>
+        <div className="stage-item" style={{ marginBottom: '20px', borderColor: 'var(--accent-border)' }}>
+          <div className="stage-item-left">
+            <strong>Just need the YAML?</strong>
+            <span>
+              Download your pipeline file and set up secrets manually in your
+              GitHub repository under Settings → Secrets → Actions.
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button className="btn btn-ghost" onClick={onBack}>Back</button>
+          <button className="btn btn-primary" onClick={onSkip}>Download YAML</button>
+        </div>
+      </div>
+    )
+  }
+
+  // User connected — show the full secrets form
   return (
     <div>
       <h2 className="step-title">GitHub Actions Secrets</h2>
       <p className="step-subtitle">
-        Push secrets directly to <strong style={{ color: 'var(--text-primary)' }}>{owner}/{repo}</strong>.
+        Push secrets directly to{' '}
+        <strong style={{ color: 'var(--text-primary)' }}>{owner}/{repo}</strong>.
         Values are encrypted before leaving this app and never stored.
       </p>
 
@@ -104,6 +136,9 @@ export default function StepGitHubSecrets({ owner, repo, onSubmit, onBack, isLoa
 
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
         <button className="btn btn-ghost" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onSkip}>
+          Skip, just download
+        </button>
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
