@@ -7,54 +7,49 @@ import StepProjectInfo from './steps/StepProjectInfo'
 import StepPipeline from './steps/StepPipeline'
 import StepGitLabVariables from './steps/StepGitLabVariables'
 import StepGitHubConnect from './steps/StepGitHubConnect'
+import StepGitLabConnect from './steps/StepGitLabConnect'
 import StepGitHubSecrets from './steps/StepGitHubSecrets'
 import PushResult from './components/PushResult'
 import './App.css'
-import { encryptSecret } from './utils/encrypt'
 
-type PushResult = {
+type PushResultType = {
   success: boolean
   created: string[]
   updated: string[]
+  pushed?: string[]
   failed: { key: string; reason: string }[]
 }
 
 type GitHubAuth = { token: string; owner: string; repo: string }
-
-const getStepCount = (platform?: string) => {
-  if (platform === 'github-actions') return 5
-  if (platform === 'gitlab-ci') return 4
-  return 3
-}
+type GitLabAuth = { token: string; projectId: string; projectPath: string }
 
 export default function App() {
   const [step, setStep] = useState(1)
   const [data, setData] = useState<WizardData>(defaultWizardData)
   const [githubAuth, setGithubAuth] = useState<GitHubAuth | null>(null)
+  const [gitlabAuth, setGitlabAuth] = useState<GitLabAuth | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [pushResult, setPushResult] = useState<PushResult | null>(null)
+  const [pushResult, setPushResult] = useState<PushResultType | null>(null)
 
   const update = (newData: Partial<WizardData>) =>
     setData(prev => ({ ...prev, ...newData }))
 
-  const totalSteps = getStepCount(data.platform)
+  // Both platforms now have 5 steps
+  const totalSteps = data.platform ? 5 : 3
   const next = () => setStep(s => Math.min(s + 1, totalSteps))
   const back = () => setStep(s => Math.max(s - 1, 1))
 
-  const yaml = generateYAML(data)
-
-  // Determine what each step number renders
-  // GitHub: 1=Platform, 2=Connect, 3=ProjectInfo, 4=Pipeline, 5=Secrets
-  // GitLab: 1=Platform, 2=ProjectInfo, 3=Pipeline, 4=Variables
   const isGitHub = data.platform === 'github-actions'
   const isGitLab = data.platform === 'gitlab-ci'
 
-  const isGitHubConnectStep = isGitHub && step === 2
-  const isProjectInfoStep = (isGitHub && step === 3) || (isGitLab && step === 2) || (!data.platform && step === 2)
-  const isPipelineStep = (isGitHub && step === 4) || (isGitLab && step === 3)
-  const isGitLabVariablesStep = isGitLab && step === 4
-  const isGitHubSecretsStep = isGitHub && step === 5
-  const isActionStep = isGitLabVariablesStep || isGitHubSecretsStep
+  // Step layout is now symmetrical:
+  // 1=Platform, 2=Connect, 3=ProjectInfo, 4=Pipeline, 5=Action (secrets/variables)
+  const isConnectStep   = step === 2
+  const isProjectStep   = step === 3
+  const isPipelineStep  = step === 4
+  const isActionStep    = step === 5
+
+  const yaml = generateYAML(data)
 
   const handleDownload = async () => {
     const res = await fetch('http://localhost:3001/api/generate', {
@@ -71,17 +66,18 @@ export default function App() {
     URL.revokeObjectURL(url)
   }
 
-  const handlePushGitLabVariables = async (
-    projectId: string,
-    token: string,
-    variables: CIVariable[]
-  ) => {
+  const handlePushGitLabVariables = async (variables: CIVariable[]) => {
+    if (!gitlabAuth) return
     setIsLoading(true)
     try {
       const res = await fetch('http://localhost:3001/api/variables', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId, token, variables })
+        body: JSON.stringify({
+          projectId: gitlabAuth.projectId,
+          token: gitlabAuth.token,
+          variables
+        })
       })
       setPushResult(await res.json())
     } catch {
@@ -91,55 +87,39 @@ export default function App() {
     }
   }
 
-const handlePushGitHubSecrets = async (secrets: { key: string; value: string }[]) => {
-  if (!githubAuth) return
-  setIsLoading(true)
-
-  try {
-    // 1. Fetch the public key
-    const pkRes = await fetch(
-      `http://localhost:3001/api/github/public-key?owner=${githubAuth.owner}&repo=${githubAuth.repo}`,
-      { headers: { Authorization: `Bearer ${githubAuth.token}` } }
-    )
-    const { key_id, key: publicKey } = await pkRes.json()
-
-    // 2. Encrypt every value locally — backend never sees plain text
-    const encryptedSecrets = await Promise.all(
-      secrets.map(async (s) => ({
-        key: s.key,
-        encryptedValue: await encryptSecret(publicKey, s.value),
-        keyId: key_id,
-      }))
-    )
-
-    // 3. Send pre-encrypted values to backend for forwarding
-    const res = await fetch('http://localhost:3001/api/github/secrets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: githubAuth.token,
-        owner: githubAuth.owner,
-        repo:  githubAuth.repo,
-        secrets: encryptedSecrets
+  const handlePushGitHubSecrets = async (secrets: { key: string; value: string }[]) => {
+    if (!githubAuth) return
+    setIsLoading(true)
+    try {
+      const res = await fetch('http://localhost:3001/api/github/secrets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: githubAuth.token,
+          owner: githubAuth.owner,
+          repo: githubAuth.repo,
+          secrets
+        })
       })
-    })
-
-    setPushResult(await res.json())
-  } catch {
-    setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: 'Encryption or network error.' }] })
-  } finally {
-    setIsLoading(false)
+      setPushResult(await res.json())
+    } catch {
+      setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: 'Could not reach the backend.' }] })
+    } finally {
+      setIsLoading(false)
+    }
   }
-}
 
   const handleReset = () => {
     setStep(1)
     setData(defaultWizardData)
     setGithubAuth(null)
+    setGitlabAuth(null)
     setPushResult(null)
   }
 
-  const isLastStep = step === totalSteps
+  const continueDisabled =
+    isConnectStep && ((isGitHub && !githubAuth) || (isGitLab && !gitlabAuth))
+
   const showFooter = !pushResult && !isActionStep
 
   return (
@@ -162,7 +142,7 @@ const handlePushGitHubSecrets = async (secrets: { key: string; value: string }[]
             <>
               {step === 1 && <StepPlatform data={data} onChange={update} />}
 
-              {isGitHubConnectStep && (
+              {isConnectStep && isGitHub && (
                 <StepGitHubConnect
                   onChange={update}
                   onAuthChange={(token, owner, repo) =>
@@ -171,23 +151,33 @@ const handlePushGitHubSecrets = async (secrets: { key: string; value: string }[]
                 />
               )}
 
-              {isProjectInfoStep && (
-                <StepProjectInfo data={data} onChange={update} />
+              {isConnectStep && isGitLab && (
+                <StepGitLabConnect
+                  onChange={update}
+                  onAuthChange={(token, projectId, projectPath) =>
+                    setGitlabAuth({ token, projectId, projectPath })
+                  }
+                />
               )}
 
-              {isPipelineStep && (
-                <StepPipeline data={data} onChange={update} onBack={back} />
-              )}
+              {isProjectStep && <StepProjectInfo data={data} onChange={update} />}
 
-              {isGitLabVariablesStep && (
+              {isPipelineStep && <StepPipeline data={data} onChange={update} onBack={function (): void {
+                  throw new Error('Function not implemented.')
+                } } />}
+
+              {isActionStep && isGitLab && gitlabAuth && (
                 <StepGitLabVariables
+                  projectId={gitlabAuth.projectId}
+                  token={gitlabAuth.token}
+                  projectPath={gitlabAuth.projectPath}
                   onSubmit={handlePushGitLabVariables}
                   onBack={back}
                   isLoading={isLoading}
                 />
               )}
 
-              {isGitHubSecretsStep && githubAuth && (
+              {isActionStep && isGitHub && githubAuth && (
                 <StepGitHubSecrets
                   token={githubAuth.token}
                   owner={githubAuth.owner}
@@ -206,34 +196,24 @@ const handlePushGitHubSecrets = async (secrets: { key: string; value: string }[]
             {step > 1 && (
               <button className="btn btn-ghost" onClick={back}>Back</button>
             )}
-            {!isLastStep && (
+            {step < totalSteps && (
               <button
                 className="btn btn-primary"
                 onClick={next}
-                disabled={isGitHubConnectStep && !githubAuth}
+                disabled={continueDisabled}
               >
                 Continue
               </button>
             )}
-            {isLastStep && isGitHub && (
+            {step === totalSteps && (
               <>
                 <button className="btn btn-ghost" onClick={handleDownload}>
                   Download YAML
                 </button>
                 <button className="btn btn-primary" onClick={next}>
-                  Push Secrets
+                  {isGitHub ? 'Push Secrets' : 'Set Variables'}
                 </button>
               </>
-            )}
-            {isLastStep && isGitLab && (
-              <button className="btn btn-primary" onClick={next}>
-                Set Variables
-              </button>
-            )}
-            {isLastStep && !data.platform && (
-              <button className="btn btn-primary" onClick={handleDownload}>
-                Download YAML
-              </button>
             )}
           </div>
         )}
