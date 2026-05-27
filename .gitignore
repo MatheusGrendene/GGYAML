@@ -14,3 +14,7 @@ dist/
 .env.local
 .env.*
 *.local
+
+#Turbo
+tui.json
+**/tui.json
