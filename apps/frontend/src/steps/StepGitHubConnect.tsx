@@ -14,6 +14,7 @@ const LANGUAGE_MAP: Record<string, string> = {
   JavaScript: 'node',
   TypeScript: 'node',
   Python: 'python',
+  PHP: 'php',
   Java: 'java',
   Go: 'go',
 }
@@ -141,7 +142,9 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
           {selectedRepo.language && (
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Language detected: {selectedRepo.language}
-              {LANGUAGE_MAP[selectedRepo.language] ? ` → mapped to "${LANGUAGE_MAP[selectedRepo.language]}"` : ' (not mapped, you can set it manually)'}
+              {LANGUAGE_MAP[selectedRepo.language]
+                ? ` → mapped to "${LANGUAGE_MAP[selectedRepo.language]}"`
+                : ' (not in supported list, you can set it manually)'}
             </span>
           )}
         </div>
