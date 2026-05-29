@@ -34,6 +34,15 @@ type GitHubResult = {
   failed: { key: string; reason: string }[]
 }
 
+type GitHubVariable = { key: string; value: string }
+
+type GitHubVariablesConfig = {
+  token: string
+  owner: string
+  repo: string
+  variables: GitHubVariable[]
+}
+
 // --- Repo listing ---
 
 export async function getGitHubRepos(token: string): Promise<GitHubRepo[]> {
@@ -124,6 +133,74 @@ export async function pushSecretsToGitHub(config: GitHubSecretsConfig): Promise<
       result.pushed.push(secret.key)
     } catch (err: any) {
       result.failed.push({ key: secret.key, reason: err.message })
+      result.success = false
+    }
+  }
+
+  return result
+}
+
+// GitHub Variables
+async function getExistingVariableNames(
+  token: string, owner: string, repo: string
+): Promise<string[]> {
+  const res = await fetch(
+    `${GITHUB_BASE}/repos/${owner}/${repo}/actions/variables`,
+    { headers: GITHUB_HEADERS(token) }
+  )
+  if (!res.ok) return []
+  const data = await res.json() as { variables: { name: string }[] }
+  return data.variables.map(v => v.name)
+}
+
+async function createGitHubVariable(
+  token: string, owner: string, repo: string, key: string, value: string
+): Promise<void> {
+  const res = await fetch(
+    `${GITHUB_BASE}/repos/${owner}/${repo}/actions/variables`,
+    {
+      method: 'POST',
+      headers: { ...GITHUB_HEADERS(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: key, value })
+    }
+  )
+  if (res.status !== 201) throw new Error(await res.text())
+}
+
+async function updateGitHubVariable(
+  token: string, owner: string, repo: string, key: string, value: string
+): Promise<void> {
+  const res = await fetch(
+    `${GITHUB_BASE}/repos/${owner}/${repo}/actions/variables/${key}`,
+    {
+      method: 'PATCH',
+      headers: { ...GITHUB_HEADERS(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: key, value })
+    }
+  )
+  if (res.status !== 204) throw new Error(await res.text())
+}
+
+export async function pushVariablesToGitHub(config: GitHubVariablesConfig): Promise<GitHubResult> {
+  const result: GitHubResult = { success: true, pushed: [], failed: [] }
+
+  let existingNames: string[] = []
+  try {
+    existingNames = await getExistingVariableNames(config.token, config.owner, config.repo)
+  } catch (err: any) {
+    return { success: false, pushed: [], failed: [{ key: '*', reason: err.message }] }
+  }
+
+  for (const variable of config.variables) {
+    try {
+      if (existingNames.includes(variable.key)) {
+        await updateGitHubVariable(config.token, config.owner, config.repo, variable.key, variable.value)
+      } else {
+        await createGitHubVariable(config.token, config.owner, config.repo, variable.key, variable.value)
+      }
+      result.pushed.push(variable.key)
+    } catch (err: any) {
+      result.failed.push({ key: variable.key, reason: err.message })
       result.success = false
     }
   }

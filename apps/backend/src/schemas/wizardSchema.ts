@@ -35,9 +35,10 @@ export type GitLabConfigInput = z.infer<typeof gitlabConfigSchema>
 
 // GitHub schemas
 export const githubSecretSchema = z.object({
-  key: z.string().min(1).regex(/^[A-Z][A-Z0-9_]*$/),
-  encryptedValue: z.string().min(1),  // ← was "value"
-  keyId: z.string().min(1),           // ← new, needed by GitHub
+  key: z.string()
+    .min(1, 'Key is required')
+    .regex(/^[A-Z][A-Z0-9_]*$/, 'Must start with a letter, uppercase letters, numbers and underscores only'),
+  value: z.string().min(1, 'Value is required'),
 })
 
 export const githubSecretsConfigSchema = z.object({
@@ -47,4 +48,19 @@ export const githubSecretsConfigSchema = z.object({
   secrets: z.array(githubSecretSchema).min(1)
 })
 
+export const githubVariableSchema = z.object({
+  key: z.string()
+    .min(1, 'Key is required')
+    .regex(/^[A-Z][A-Z0-9_]*$/, 'Must start with a letter, uppercase letters, numbers and underscores only'),
+  value: z.string(),
+})
+
+export const githubVariablesConfigSchema = z.object({
+  token: z.string().min(1),
+  owner: z.string().min(1),
+  repo:  z.string().min(1),
+  variables: z.array(githubVariableSchema).min(1)
+})
+
 export type GitHubSecretsConfigInput = z.infer<typeof githubSecretsConfigSchema>
+export type GitHubVariablesConfigInput = z.infer<typeof githubVariablesConfigSchema>

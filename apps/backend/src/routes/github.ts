@@ -1,12 +1,11 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { githubSecretsConfigSchema } from '../schemas/wizardSchema'
-import { getGitHubRepos, pushSecretsToGitHub } from '../services/github'
+import { getGitHubRepos, pushSecretsToGitHub, pushVariablesToGitHub } from '../services/github'
+import { githubSecretsConfigSchema, githubVariablesConfigSchema } from '../schemas/wizardSchema'
 
 const github = new Hono()
 
 // GET /api/github/repos
-// Token is passed in Authorization header: "Bearer <token>"
 github.get('/repos', async (c) => {
   const authHeader = c.req.header('Authorization')
 
@@ -25,26 +24,30 @@ github.get('/repos', async (c) => {
 })
 
 // POST /api/github/secrets
+// Receives plain text values — encryption happens here in the service
 github.post('/secrets', zValidator('json', githubSecretsConfigSchema), async (c) => {
-  const { token, owner, repo, secrets } = c.req.valid('json')
+  const config = c.req.valid('json')
 
-  const results = await Promise.all(secrets.map(async (s) => {
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/actions/secrets/${s.key}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ encrypted_value: s.encryptedValue, key_id: s.keyId })
-      }
-    )
-    return { key: s.key, success: res.status === 201 || res.status === 204 }
-  }))
+  const result = await pushSecretsToGitHub(config)
 
-  return c.json({ results })
+  if (!result.success && result.pushed.length === 0) {
+    return c.json({ error: 'All secrets failed to push', details: result.failed }, 500)
+  }
+
+  return c.json(result, 200)
+})
+
+// POST /api/github/variables — no encryption needed
+github.post('/variables', zValidator('json', githubVariablesConfigSchema), async (c) => {
+  const config = c.req.valid('json')
+
+  const result = await pushVariablesToGitHub(config)
+
+  if (!result.success && result.pushed.length === 0) {
+    return c.json({ error: 'All variables failed to push', details: result.failed }, 500)
+  }
+
+  return c.json(result, 200)
 })
 
 github.get('/public-key', async (c) => {
