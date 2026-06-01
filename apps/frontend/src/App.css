@@ -8,8 +8,8 @@
 
 /* ── Wizard panel ── */
 .wizard-panel {
-  width: 440px;
-  min-width: 360px;
+  width: 520px;
+  min-width: 420px;
   background: var(--bg-panel);
   border-right: 1px solid var(--border);
   display: flex;
