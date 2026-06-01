@@ -34,7 +34,7 @@ export default function App() {
   const [gitlabAuth, setGitlabAuth] = useState<GitLabAuth | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [pushResult, setPushResult] = useState<PushResultType | null>(null)
-  //const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const update = (newData: Partial<WizardData>) =>
     setData(prev => ({ ...prev, ...newData }))
@@ -57,14 +57,14 @@ export default function App() {
   const currentStepName = stepNames[step - 1] ?? ''
 
   const yaml = generateYAML(data)
-  /*   const yamlLines = yaml.split('\n')
-  
-    const handleCopy = () => {
-      navigator.clipboard.writeText(yaml).then(() => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      })
-    } */
+  const yamlLines = yaml.split('\n')
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(yaml).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   const handleDownload = async () => {
     const res = await fetch('http://localhost:3001/api/generate', {
@@ -202,14 +202,19 @@ export default function App() {
     <div className="app">
       <div className="wizard-panel">
         <div className="wizard-header">
-          <h1>GGYAML</h1>
-          <p>Generate CI/CD pipeline configurations</p>
-          <div className="step-progress">
-            {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className={`step-dot ${i < step ? 'active' : ''}`} />
-            ))}
+          <div className="wizard-header-top">
+            <span className="wizard-wordmark">GGYAML</span>
+            <span className="wizard-step-badge">{step} / {totalSteps}</span>
           </div>
-          <div className="wizard-step-name">{currentStepName}</div>
+          <div className="wizard-step-area">
+            <div className="wizard-step-name">{currentStepName}</div>
+            <div className="progress-track">
+              <div
+                className="progress-fill"
+                style={{ width: `${(step / totalSteps) * 100}%` }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="wizard-content">
@@ -297,12 +302,26 @@ export default function App() {
       </div>
 
       <div className="preview-panel">
-        <div className="preview-header">
+        <div className="preview-toolbar">
+          <div className="preview-file-info">
             <div className="preview-dot" />
-          <span>pipeline.yml — live preview</span>
+            <span className="preview-filename">pipeline.yml</span>
+            <span className="preview-badge">YAML</span>
+          </div>
+          <button
+            className={`preview-copy-btn ${copied ? 'copied' : ''}`}
+            onClick={handleCopy}
+          >
+            {copied ? '✓ Copied' : '⎘ Copy'}
+          </button>
         </div>
         <div className="preview-body">
-          <pre>{yaml}</pre>
+          <div className="preview-gutter">
+            {yamlLines.map((_, i) => (
+              <div key={i}>{i + 1}</div>
+            ))}
+          </div>
+          <pre className="preview-code">{yaml}</pre>
         </div>
       </div>
     </div>
