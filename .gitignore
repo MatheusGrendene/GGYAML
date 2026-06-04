@@ -16,5 +16,6 @@ dist/
 *.local
 
 #Turbo
+.turbo/
 tui.json
 **/tui.json
