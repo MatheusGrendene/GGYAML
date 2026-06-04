@@ -6,7 +6,6 @@ import generate from './routes/generate'
 import variables from './routes/variables'
 import github from './routes/github'
 import gitlab from './routes/gitlab'
-import { is } from 'zod/locales'
 
 const app = new Hono()
 const isProd = process.env.NODE_ENV === 'production'
