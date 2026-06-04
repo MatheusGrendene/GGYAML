@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "start": "bun run apps/backend/src/index.ts",
     "lint": "turbo lint"
   },
   "devDependencies": {
