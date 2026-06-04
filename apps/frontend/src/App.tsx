@@ -67,7 +67,7 @@ export default function App() {
   }
 
   const handleDownload = async () => {
-    const res = await fetch('http://localhost:3001/api/generate', {
+    const res = await fetch(' /api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -90,7 +90,7 @@ export default function App() {
     if (!gitlabAuth) return
     setIsLoading(true)
     try {
-      const res = await fetch('http://localhost:3001/api/variables', {
+      const res = await fetch(' /api/variables', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,7 +131,7 @@ export default function App() {
 
     try {
       if (secrets.length > 0) {
-        const res = await fetch('http://localhost:3001/api/github/secrets', {
+        const res = await fetch(' /api/github/secrets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -154,7 +154,7 @@ export default function App() {
       }
 
       if (variables.length > 0) {
-        const res = await fetch('http://localhost:3001/api/github/variables', {
+        const res = await fetch(' /api/github/variables', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

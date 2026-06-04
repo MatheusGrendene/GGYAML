@@ -41,7 +41,7 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
     setError('')
 
     try {
-      const res = await fetch('http://localhost:3001/api/gitlab/repos', {
+      const res = await fetch(' /api/gitlab/repos', {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -71,7 +71,7 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
     setIsLoadingLang(true)
     try {
       const res = await fetch(
-        `http://localhost:3001/api/gitlab/language?projectId=${project.id}`,
+        ` /api/gitlab/language?projectId=${project.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       const { language } = await res.json() as { language: string | null }

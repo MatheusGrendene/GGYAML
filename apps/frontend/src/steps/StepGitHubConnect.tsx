@@ -41,7 +41,7 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
     setError('')
 
     try {
-      const res = await fetch('http://localhost:3001/api/github/repos', {
+      const res = await fetch(' /api/github/repos', {
         headers: { Authorization: `Bearer ${token}` }
       })
 
