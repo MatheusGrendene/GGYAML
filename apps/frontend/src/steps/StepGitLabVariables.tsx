@@ -43,7 +43,7 @@ export default function StepGitLabVariables({
   const handleSubmit = () => {
     const valid = variables.every(v => v.key.trim() !== '')
     if (!valid) {
-      alert('All variables must have a key.')
+      alert('Todas as variáveis precisam ter uma chave.')
       return
     }
     onSubmit(variables)
@@ -53,23 +53,23 @@ export default function StepGitLabVariables({
   if (!hasAuth) {
     return (
       <div>
-        <h2 className="step-title">GitLab CI/CD Variables</h2>
+        <h2 className="step-title">Variáveis CI/CD do GitLab</h2>
         <p className="step-subtitle">
-          You skipped the GitLab connect step, so variables cannot be pushed automatically.
-          Your YAML file is ready to download.
+          Você pulou a etapa de conexão com o GitLab, então as variáveis não podem ser enviadas automaticamente.
+          Seu arquivo YAML está pronto para download.
         </p>
         <div className="stage-item" style={{ marginBottom: '20px', borderColor: 'var(--accent-border)' }}>
           <div className="stage-item-left">
-            <strong>Just need the YAML?</strong>
+            <strong>Só precisa do YAML?</strong>
             <span>
-              Download your pipeline file and set up variables manually in your
-              GitLab project under Settings → CI/CD → Variables.
+              Baixe seu arquivo de pipeline e configure as variáveis manualmente no seu projeto
+              GitLab em Settings → CI/CD → Variables.
             </span>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost" onClick={onBack}>Back</button>
-          <button className="btn btn-primary" onClick={onSkip}>Download YAML</button>
+          <button className="btn btn-ghost" onClick={onBack}>Voltar</button>
+          <button className="btn btn-primary" onClick={onSkip}>Baixar YAML</button>
         </div>
       </div>
     )
@@ -78,13 +78,13 @@ export default function StepGitLabVariables({
   // User connected — show the full variables form
   return (
     <div>
-      <h2 className="step-title">GitLab CI/CD Variables</h2>
+      <h2 className="step-title">Variáveis CI/CD do GitLab</h2>
       <p className="step-subtitle">
-        Push variables directly to{' '}
+        Envie variáveis diretamente para{' '}
         <strong style={{ color: 'var(--text-primary)' }}>
-          {projectPath ?? 'your project'}
+          {projectPath ?? 'seu projeto'}
         </strong>.
-        Your token is never stored.
+        Seu token nunca é armazenado.
       </p>
 
       <div className="stage-list" style={{ marginBottom: '12px' }}>
@@ -106,7 +106,7 @@ export default function StepGitLabVariables({
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.82rem'
                 }}
-                placeholder="KEY_NAME"
+                placeholder="NOME_DA_CHAVE"
                 value={v.key}
                 onChange={e => updateVariable(i, 'key', e.target.value.toUpperCase())}
               />
@@ -121,7 +121,7 @@ export default function StepGitLabVariables({
                   fontFamily: 'var(--font-mono)',
                   fontSize: '0.82rem'
                 }}
-                placeholder="value"
+                placeholder="valor"
                 type={v.masked ? 'password' : 'text'}
                 value={v.value}
                 onChange={e => updateVariable(i, 'value', e.target.value)}
@@ -144,7 +144,7 @@ export default function StepGitLabVariables({
                   checked={v.masked}
                   onChange={e => updateVariable(i, 'masked', e.target.checked)}
                 />
-                Masked
+                Mascarada
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                 <input
@@ -152,10 +152,10 @@ export default function StepGitLabVariables({
                   checked={v.protected}
                   onChange={e => updateVariable(i, 'protected', e.target.checked)}
                 />
-                Protected
+                Protegida
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Scope:</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Escopo:</span>
                 <select
                   style={{
                     background: 'var(--bg-primary)',
@@ -168,10 +168,10 @@ export default function StepGitLabVariables({
                   value={v.environment_scope}
                   onChange={e => updateVariable(i, 'environment_scope', e.target.value)}
                 >
-                  <option value="*">All</option>
-                  <option value="production">Production</option>
-                  <option value="staging">Staging</option>
-                  <option value="development">Development</option>
+                  <option value="*">Todos</option>
+                  <option value="production">Produção</option>
+                  <option value="staging">Homologação</option>
+                  <option value="development">Desenvolvimento</option>
                 </select>
               </div>
             </div>
@@ -184,20 +184,20 @@ export default function StepGitLabVariables({
         style={{ width: '100%', marginBottom: '16px' }}
         onClick={addVariable}
       >
-        + Add variable
+        + Adicionar variável
       </button>
 
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-        <button className="btn btn-ghost" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack}>Voltar</button>
         <button className="btn btn-ghost" onClick={onSkip}>
-          Skip, just download
+          Pular, apenas baixar
         </button>
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
           disabled={isLoading}
         >
-          {isLoading ? 'Pushing...' : 'Push to GitLab'}
+          {isLoading ? 'Enviando...' : 'Enviar ao GitLab'}
         </button>
       </div>
     </div>

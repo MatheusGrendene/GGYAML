@@ -33,7 +33,7 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
 
   const fetchRepos = async () => {
     if (!token.trim()) {
-      setError('Please enter your Personal Access Token.')
+      setError('Por favor, insira seu Personal Access Token.')
       return
     }
 
@@ -47,13 +47,13 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
 
       if (!res.ok) {
         const data = await res.json() as { error: string }
-        throw new Error(data.error || 'Failed to fetch repositories')
+        throw new Error(data.error || 'Falha ao buscar repositórios')
       }
 
       const data = await res.json() as Repo[]
       setRepos(data)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unknown error occurred'
+      const message = err instanceof Error ? err.message : 'Ocorreu um erro desconhecido'
       setError(message)
     } finally {
       setIsLoading(false)
@@ -78,10 +78,10 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
 
   return (
     <div>
-      <h2 className="step-title">Connect to GitHub</h2>
+      <h2 className="step-title">Conectar ao GitHub</h2>
       <p className="step-subtitle">
-        Enter your Personal Access Token to load your repositories and auto-fill the form.
-        Your token is never stored.
+        Insira seu Personal Access Token para carregar seus repositórios e preencher o formulário automaticamente.
+        Seu token nunca é armazenado.
       </p>
 
       <div className="field">
@@ -101,12 +101,12 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
             disabled={isLoading}
             style={{ whiteSpace: 'nowrap' }}
           >
-            {isLoading ? 'Loading...' : 'Fetch repos'}
+            {isLoading ? 'Carregando...' : 'Buscar repositórios'}
           </button>
         </div>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-          Needs <code style={{ fontFamily: 'var(--font-mono)' }}>repo</code> scope.
-          Create one at GitHub → Settings → Developer settings → Personal access tokens.
+          Requer o scope <code style={{ fontFamily: 'var(--font-mono)' }}>repo</code>.
+          Crie um em GitHub → Settings → Developer settings → Personal access tokens.
         </p>
       </div>
 
@@ -118,12 +118,12 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
 
       {repos.length > 0 && (
         <div className="field">
-          <label>Repository</label>
+          <label>Repositório</label>
           <select
             value={selectedRepo?.full_name ?? ''}
             onChange={e => handleSelectRepo(e.target.value)}
           >
-            <option value="">Select a repository...</option>
+            <option value="">Selecione um repositório...</option>
             {repos.map(r => (
               <option key={r.full_name} value={r.full_name}>
                 {r.full_name} {r.private ? '🔒' : ''}
@@ -135,16 +135,16 @@ export default function StepGitHubConnect({ onChange, onAuthChange }: Props) {
 
       {selectedRepo && (
         <div className="stage-item active" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px', marginTop: '8px' }}>
-          <strong style={{ fontSize: '0.85rem' }}>✓ Repository selected</strong>
+          <strong style={{ fontSize: '0.85rem' }}>✓ Repositório selecionado</strong>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
             {selectedRepo.full_name}
           </span>
           {selectedRepo.language && (
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Language detected: {selectedRepo.language}
+              Linguagem detectada: {selectedRepo.language}
               {LANGUAGE_MAP[selectedRepo.language]
-                ? ` → mapped to "${LANGUAGE_MAP[selectedRepo.language]}"`
-                : ' (not in supported list, you can set it manually)'}
+                ? ` → mapeada para "${LANGUAGE_MAP[selectedRepo.language]}"`
+                : ' (não está na lista suportada, você pode defini-la manualmente)'}
             </span>
           )}
         </div>

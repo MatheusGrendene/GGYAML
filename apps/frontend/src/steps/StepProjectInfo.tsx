@@ -10,26 +10,26 @@ export default function StepProjectInfo({ data, onChange }: Props) {
 
   return (
     <div>
-      <h2 className="step-title">Project info</h2>
-      <p className="step-subtitle">Tell us a bit about your project.</p>
+      <h2 className="step-title">Informações do projeto</h2>
+      <p className="step-subtitle">Conte-nos um pouco sobre seu projeto.</p>
 
       <div className="field">
-        <label>Project name</label>
+        <label>Nome do projeto</label>
         <input
           type="text"
-          placeholder="my-app"
+          placeholder="meu-app"
           value={data.projectName || ''}
           onChange={e => onChange({ projectName: e.target.value })}
         />
       </div>
 
       <div className="field">
-        <label>Language</label>
+        <label>Linguagem</label>
         <select
           value={data.language || ''}
           onChange={e => onChange({ language: e.target.value })}
         >
-          <option value="">Select a language</option>
+          <option value="">Selecione uma linguagem</option>
           <option value="node">Node.js / React</option>
           <option value="python">Python</option>
           <option value="php">PHP</option>
@@ -41,7 +41,7 @@ export default function StepProjectInfo({ data, onChange }: Props) {
       {/* Node.js version */}
       {lang === 'node' && (
         <div className="field">
-          <label>Node.js version</label>
+          <label>Versão do Node.js</label>
           <select
             value={data.nodeVersion || '20'}
             onChange={e => onChange({ nodeVersion: e.target.value })}
@@ -56,14 +56,14 @@ export default function StepProjectInfo({ data, onChange }: Props) {
       {/* Python version */}
       {lang === 'python' && (
         <div className="field">
-          <label>Python version</label>
+          <label>Versão do Python</label>
           <select
             value={data.pythonVersion || '3.11'}
             onChange={e => onChange({ pythonVersion: e.target.value })}
           >
             <option value="3.9">3.9</option>
             <option value="3.10">3.10</option>
-            <option value="3.11">3.11 (recommended)</option>
+            <option value="3.11">3.11 (recomendado)</option>
             <option value="3.12">3.12</option>
           </select>
         </div>
@@ -72,14 +72,14 @@ export default function StepProjectInfo({ data, onChange }: Props) {
       {/* PHP version */}
       {lang === 'php' && (
         <div className="field">
-          <label>PHP version</label>
+          <label>Versão do PHP</label>
           <select
             value={data.phpVersion || '8.2'}
             onChange={e => onChange({ phpVersion: e.target.value })}
           >
             <option value="8.0">8.0</option>
             <option value="8.1">8.1</option>
-            <option value="8.2">8.2 (recommended)</option>
+            <option value="8.2">8.2 (recomendado)</option>
             <option value="8.3">8.3</option>
           </select>
         </div>
@@ -89,10 +89,10 @@ export default function StepProjectInfo({ data, onChange }: Props) {
       {lang && !['node', 'python', 'php'].includes(lang) && (
         <div className="stage-item" style={{ borderColor: 'var(--accent-border)' }}>
           <div className="stage-item-left">
-            <strong>Basic template</strong>
+            <strong>Template básico</strong>
             <span>
-              {lang.charAt(0).toUpperCase() + lang.slice(1)} support is coming soon.
-              A generic pipeline will be generated for now.
+              O suporte a {lang.charAt(0).toUpperCase() + lang.slice(1)} está em breve.
+              Por enquanto, um pipeline genérico será gerado.
             </span>
           </div>
         </div>

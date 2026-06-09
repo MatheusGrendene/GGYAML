@@ -6,15 +6,15 @@ type Props = {
 }
 
 const platforms = [
-  { id: 'github-actions', icon: '🐙', name: 'GitHub Actions', desc: 'Integrated with GitHub repositories' },
-  { id: 'gitlab-ci', icon: '🦊', name: 'GitLab CI', desc: 'Native GitLab pipeline configuration' },
+  { id: 'github-actions', icon: '🐙', name: 'GitHub Actions', desc: 'Integrado aos repositórios do GitHub' },
+  { id: 'gitlab-ci', icon: '🦊', name: 'GitLab CI', desc: 'Configuração nativa de pipeline do GitLab' },
 ] as const
 
 export default function StepPlatform({ data, onChange }: Props) {
   return (
     <div>
-      <h2 className="step-title">Choose your platform</h2>
-      <p className="step-subtitle">Select the CI/CD platform your project uses.</p>
+      <h2 className="step-title">Escolha sua plataforma</h2>
+      <p className="step-subtitle">Selecione a plataforma de CI/CD que seu projeto utiliza.</p>
       <div className="platform-grid">
         {platforms.map(p => (
           <div

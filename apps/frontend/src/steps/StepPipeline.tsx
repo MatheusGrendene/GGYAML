@@ -7,9 +7,9 @@ type Props = {
 }
 
 const stages: { key: keyof WizardData['stages']; name: string; desc: string }[] = [
-  { key: 'build', name: 'Build', desc: 'Compile and package your application' },
-  { key: 'test', name: 'Test', desc: 'Run automated tests' },
-  { key: 'deploy', name: 'Deploy', desc: 'Deploy to your target environment' },
+  { key: 'build', name: 'Build', desc: 'Compile e empacote sua aplicação' },
+  { key: 'test', name: 'Test', desc: 'Execute testes automatizados' },
+  { key: 'deploy', name: 'Deploy', desc: 'Faça deploy para o ambiente desejado' },
 ]
 
 export default function StepPipeline({ data, onChange }: Props) {
@@ -19,8 +19,8 @@ export default function StepPipeline({ data, onChange }: Props) {
 
   return (
     <div>
-      <h2 className="step-title">Pipeline stages</h2>
-      <p className="step-subtitle">Choose which stages to include in your pipeline.</p>
+      <h2 className="step-title">Estágios do pipeline</h2>
+      <p className="step-subtitle">Escolha quais estágios incluir no seu pipeline.</p>
       <div className="stage-list">
         {stages.map(s => (
           <div

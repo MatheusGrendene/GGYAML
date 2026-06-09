@@ -23,8 +23,8 @@ type GitHubAuth = { token: string; owner: string; repo: string }
 type GitLabAuth = { token: string; projectId: string; projectPath: string }
 
 const STEP_NAMES: Record<string, string[]> = {
-  'github-actions': ['Platform', 'Connect', 'Project info', 'Pipeline', 'Secrets & vars'],
-  'gitlab-ci': ['Platform', 'Connect', 'Project info', 'Pipeline', 'Variables'],
+  'github-actions': ['Plataforma', 'Conectar', 'Informações do projeto', 'Pipeline', 'Secrets e variáveis'],
+  'gitlab-ci': ['Plataforma', 'Conectar', 'Informações do projeto', 'Pipeline', 'Variáveis'],
 }
 
 export default function App() {
@@ -52,8 +52,8 @@ export default function App() {
   const isActionStep = step === 5
 
   const stepNames = data.platform
-    ? (STEP_NAMES[data.platform] ?? ['Platform', 'Connect', 'Configure'])
-    : ['Platform', 'Connect', 'Configure']
+    ? (STEP_NAMES[data.platform] ?? ['Plataforma', 'Conectar', 'Configurar'])
+    : ['Plataforma', 'Conectar', 'Configurar']
   const currentStepName = stepNames[step - 1] ?? ''
 
   const yaml = generateYAML(data)
@@ -101,7 +101,7 @@ export default function App() {
       })
 
       if (!res.ok) {
-        setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: `Server error: ${res.status}` }] })
+        setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: `Erro do servidor: ${res.status}` }] })
         return
       }
 
@@ -109,7 +109,7 @@ export default function App() {
       if (json.success) await handleDownload()
       setPushResult(json)
     } catch {
-      setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: 'Could not reach the backend.' }] })
+      setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: 'Não foi possível conectar ao backend.' }] })
     } finally {
       setIsLoading(false)
     }
@@ -143,7 +143,7 @@ export default function App() {
         })
 
         if (!res.ok) {
-          combined.failed.push({ key: '(secrets)', reason: `Server error: ${res.status}` })
+          combined.failed.push({ key: '(secrets)', reason: `Erro do servidor: ${res.status}` })
           combined.success = false
         } else {
           const json = await res.json() as { success: boolean; pushed?: string[]; failed: { key: string; reason: string }[] }
@@ -166,7 +166,7 @@ export default function App() {
         })
 
         if (!res.ok) {
-          combined.failed.push({ key: '(variables)', reason: `Server error: ${res.status}` })
+          combined.failed.push({ key: '(variables)', reason: `Erro do servidor: ${res.status}` })
           combined.success = false
         } else {
           const json = await res.json() as { success: boolean; pushed?: string[]; failed: { key: string; reason: string }[] }
@@ -182,7 +182,7 @@ export default function App() {
 
       setPushResult(combined)
     } catch {
-      setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: 'Could not reach the backend.' }] })
+      setPushResult({ success: false, created: [], updated: [], failed: [{ key: '*', reason: 'Não foi possível conectar ao backend.' }] })
     } finally {
       setIsLoading(false)
     }
@@ -277,22 +277,22 @@ export default function App() {
           <div className="wizard-footer">
             <div>
               {step > 1 && (
-                <button className="btn btn-ghost" onClick={back}>← Back</button>
+                <button className="btn btn-ghost" onClick={back}>← Voltar</button>
               )}
             </div>
             <div className="wizard-footer-right">
               {step < totalSteps && (
                 <button className="btn btn-primary" onClick={next}>
-                  Continue →
+                  Continuar →
                 </button>
               )}
               {step === totalSteps && (
                 <>
                   <button className="btn btn-ghost" onClick={handleDownload}>
-                    ↓ Download
+                    ↓ Baixar
                   </button>
                   <button className="btn btn-primary" onClick={next}>
-                    {isGitHub ? 'Push secrets →' : 'Set variables →'}
+                    {isGitHub ? 'Enviar secrets →' : 'Definir variáveis →'}
                   </button>
                 </>
               )}
@@ -312,7 +312,7 @@ export default function App() {
             className={`preview-copy-btn ${copied ? 'copied' : ''}`}
             onClick={handleCopy}
           >
-            {copied ? '✓ Copied' : '⎘ Copy'}
+            {copied ? '✓ Copiado' : '⎘ Copiar'}
           </button>
         </div>
         <div className="preview-body">

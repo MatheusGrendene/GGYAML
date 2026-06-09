@@ -58,7 +58,7 @@ export default function StepGitHubConfig({
     // Secrets must have a value if a key is provided
     const invalidSecret = filledSecrets.find(s => s.value.trim() === '')
     if (invalidSecret) {
-      alert(`Secret "${invalidSecret.key}" must have a value.`)
+      alert(`O secret "${invalidSecret.key}" precisa ter um valor.`)
       return
     }
 
@@ -69,23 +69,23 @@ export default function StepGitHubConfig({
   if (!hasAuth) {
     return (
       <div>
-        <h2 className="step-title">GitHub Actions Configuration</h2>
+        <h2 className="step-title">Configuração do GitHub Actions</h2>
         <p className="step-subtitle">
-          You skipped the GitHub connect step, so secrets and variables cannot be
-          pushed automatically. Your YAML file is ready to download.
+          Você pulou a etapa de conexão com o GitHub, então os secrets e variáveis não podem
+          ser enviados automaticamente. Seu arquivo YAML está pronto para download.
         </p>
         <div className="stage-item" style={{ marginBottom: '20px', borderColor: 'var(--accent-border)' }}>
           <div className="stage-item-left">
-            <strong>Just need the YAML?</strong>
+            <strong>Só precisa do YAML?</strong>
             <span>
-              Download your pipeline file and set up secrets and variables manually
-              in your GitHub repository under Settings → Secrets and variables → Actions.
+              Baixe seu arquivo de pipeline e configure os secrets e variáveis manualmente
+              no seu repositório GitHub em Settings → Secrets and variables → Actions.
             </span>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost" onClick={onBack}>Back</button>
-          <button className="btn btn-primary" onClick={onSkip}>Download YAML</button>
+          <button className="btn btn-ghost" onClick={onBack}>Voltar</button>
+          <button className="btn btn-primary" onClick={onSkip}>Baixar YAML</button>
         </div>
       </div>
     )
@@ -106,13 +106,13 @@ export default function StepGitHubConfig({
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
               style={{ ...inputStyle, flex: 1 }}
-              placeholder={isSecret ? 'SECRET_KEY' : 'VARIABLE_NAME'}
+              placeholder={isSecret ? 'CHAVE_DO_SECRET' : 'NOME_DA_VARIAVEL'}
               value={item.key}
               onChange={e => updateItem(list, setList, i, 'key', e.target.value.toUpperCase())}
             />
             <input
               style={{ ...inputStyle, flex: 2 }}
-              placeholder={isSecret ? 'secret value' : 'value'}
+              placeholder={isSecret ? 'valor do secret' : 'valor'}
               type={isSecret ? 'password' : 'text'}
               value={item.value}
               onChange={e => updateItem(list, setList, i, 'value', e.target.value)}
@@ -134,47 +134,47 @@ export default function StepGitHubConfig({
 
   return (
     <div>
-      <h2 className="step-title">GitHub Actions Configuration</h2>
+      <h2 className="step-title">Configuração do GitHub Actions</h2>
       <p className="step-subtitle">
-        Push secrets and variables to{' '}
+        Envie secrets e variáveis para{' '}
         <strong style={{ color: 'var(--text-primary)' }}>{owner}/{repo}</strong>.
-        Leave a section empty to skip it.
+        Deixe uma seção vazia para pulá-la.
       </p>
 
       {/* Secrets section */}
-      {sectionLabel('🔒', 'Secrets', 'Encrypted and hidden in logs — use for passwords, tokens, API keys')}
+      {sectionLabel('🔒', 'Secrets', 'Criptografados e ocultos nos logs — use para senhas, tokens e chaves de API')}
       {renderList(secrets, setSecrets, true)}
       <button
         className="btn btn-ghost"
         style={{ width: '100%', marginBottom: '20px' }}
         onClick={() => addItem(secrets, setSecrets)}
       >
-        + Add secret
+        + Adicionar secret
       </button>
 
       {/* Divider */}
       <div style={{ height: '1px', background: 'var(--border)', margin: '4px 0 20px' }} />
 
       {/* Variables section */}
-      {sectionLabel('📋', 'Variables', 'Plain text and visible in logs — use for environment names, config values')}
+      {sectionLabel('📋', 'Variáveis', 'Texto puro e visíveis nos logs — use para nomes de ambiente e valores de configuração')}
       {renderList(variables, setVariables, false)}
       <button
         className="btn btn-ghost"
         style={{ width: '100%', marginBottom: '20px' }}
         onClick={() => addItem(variables, setVariables)}
       >
-        + Add variable
+        + Adicionar variável
       </button>
 
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-        <button className="btn btn-ghost" onClick={onBack}>Back</button>
-        <button className="btn btn-ghost" onClick={onSkip}>Skip, just download</button>
+        <button className="btn btn-ghost" onClick={onBack}>Voltar</button>
+        <button className="btn btn-ghost" onClick={onSkip}>Pular, apenas baixar</button>
         <button
           className="btn btn-primary"
           onClick={handleSubmit}
           disabled={isLoading}
         >
-          {isLoading ? 'Pushing...' : 'Push all'}
+          {isLoading ? 'Enviando...' : 'Enviar tudo'}
         </button>
       </div>
     </div>

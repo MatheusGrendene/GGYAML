@@ -12,13 +12,13 @@ export default function PushResult({ result, onReset }: Props) {
   return (
     <div>
       <h2 className="step-title">
-        {result.success ? '✅ Variables pushed!' : '⚠️ Partial success'}
+        {result.success ? '✅ Variáveis enviadas!' : '⚠️ Sucesso parcial'}
       </h2>
-      <p className="step-subtitle">Here's what happened:</p>
+      <p className="step-subtitle">Veja o que aconteceu:</p>
 
       {result.created.length > 0 && (
         <div className="stage-item active" style={{ marginBottom: '10px', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <strong style={{ fontSize: '0.82rem', color: 'var(--accent)' }}>Created</strong>
+          <strong style={{ fontSize: '0.82rem', color: 'var(--accent)' }}>Criados</strong>
           {result.created.map(k => (
             <code key={k} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>{k}</code>
           ))}
@@ -27,7 +27,7 @@ export default function PushResult({ result, onReset }: Props) {
 
       {result.updated.length > 0 && (
         <div className="stage-item" style={{ marginBottom: '10px', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <strong style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Updated</strong>
+          <strong style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Atualizados</strong>
           {result.updated.map(k => (
             <code key={k} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>{k}</code>
           ))}
@@ -36,7 +36,7 @@ export default function PushResult({ result, onReset }: Props) {
 
       {result.failed.length > 0 && (
         <div className="stage-item" style={{ marginBottom: '10px', flexDirection: 'column', alignItems: 'flex-start', borderColor: '#ff6b6b' }}>
-          <strong style={{ fontSize: '0.82rem', color: '#ff6b6b' }}>Failed</strong>
+          <strong style={{ fontSize: '0.82rem', color: '#ff6b6b' }}>Falharam</strong>
           {result.failed.map(f => (
             <div key={f.key}>
               <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-primary)' }}>{f.key}</code>
@@ -47,7 +47,7 @@ export default function PushResult({ result, onReset }: Props) {
       )}
 
       <button className="btn btn-ghost" style={{ marginTop: '16px' }} onClick={onReset}>
-        Start over
+        Recomeçar
       </button>
     </div>
   )

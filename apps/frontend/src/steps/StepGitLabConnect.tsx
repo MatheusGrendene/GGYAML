@@ -33,7 +33,7 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
 
   const fetchProjects = async () => {
     if (!token.trim()) {
-      setError('Please enter your Personal Access Token.')
+      setError('Por favor, insira seu Personal Access Token.')
       return
     }
 
@@ -47,13 +47,13 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
 
       if (!res.ok) {
         const data = await res.json() as { error: string }
-        throw new Error(data.error || 'Failed to fetch projects')
+        throw new Error(data.error || 'Falha ao buscar projetos')
       }
 
       const data = await res.json() as Project[]
       setProjects(data)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch projects')
+      setError(err instanceof Error ? err.message : 'Falha ao buscar projetos')
     } finally {
       setIsLoadingRepos(false)
     }
@@ -91,10 +91,10 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
 
   return (
     <div>
-      <h2 className="step-title">Connect to GitLab</h2>
+      <h2 className="step-title">Conectar ao GitLab</h2>
       <p className="step-subtitle">
-        Enter your Personal Access Token to load your projects and auto-fill the form.
-        Your token is never stored.
+        Insira seu Personal Access Token para carregar seus projetos e preencher o formulário automaticamente.
+        Seu token nunca é armazenado.
       </p>
 
       <div className="field">
@@ -114,12 +114,12 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
             disabled={isLoadingRepos}
             style={{ whiteSpace: 'nowrap' }}
           >
-            {isLoadingRepos ? 'Loading...' : 'Fetch projects'}
+            {isLoadingRepos ? 'Carregando...' : 'Buscar projetos'}
           </button>
         </div>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-          Needs <code style={{ fontFamily: 'var(--font-mono)' }}>api</code> scope.
-          Create one at GitLab → User Settings → Access Tokens.
+          Requer o scope <code style={{ fontFamily: 'var(--font-mono)' }}>api</code>.
+          Crie um em GitLab → User Settings → Access Tokens.
         </p>
       </div>
 
@@ -131,12 +131,12 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
 
       {projects.length > 0 && (
         <div className="field">
-          <label>Project</label>
+          <label>Projeto</label>
           <select
             value={selectedProject?.id.toString() ?? ''}
             onChange={e => handleSelectProject(e.target.value)}
           >
-            <option value="">Select a project...</option>
+            <option value="">Selecione um projeto...</option>
             {projects.map(p => (
               <option key={p.id} value={p.id.toString()}>
                 {p.name_with_namespace}
@@ -152,7 +152,7 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
           style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px', marginTop: '8px' }}
         >
           <strong style={{ fontSize: '0.85rem' }}>
-            {isLoadingLang ? '⏳ Detecting language...' : '✓ Project selected'}
+            {isLoadingLang ? '⏳ Detectando linguagem...' : '✓ Projeto selecionado'}
           </strong>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
             {selectedProject.path_with_namespace}
