@@ -41,7 +41,7 @@ export default function StepGitLabConnect({ onChange, onAuthChange }: Props) {
     setError('')
 
     try {
-      const res = await fetch(' /api/gitlab/repos', {
+      const res = await fetch('/api/gitlab/repos', {
         headers: { Authorization: `Bearer ${token}` }
       })
 
